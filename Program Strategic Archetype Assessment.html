@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Program Strategic Archetype Assessment</title>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--ink:#1c1c1a;--mut:#6b6a64;--line:#dedcd4;--acc:#1f4e79;--c:#1f6f8b;--n:#b5532a;--b:#7a4fa0;--r:#3f7d4e;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171716;--card:#222220;--ink:#efede6;--mut:#a09e95;--line:#3a3a36;--acc:#7fb0dc;--c:#5fb4d0;--n:#e08a5d;--b:#b98ee0;--r:#7fc08e;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#171716;--card:#222220;--ink:#efede6;--mut:#a09e95;--line:#3a3a36;--acc:#7fb0dc;--c:#5fb4d0;--n:#e08a5d;--b:#b98ee0;--r:#7fc08e;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Georgia,"Times New Roman",serif}
+main{max-width:720px;margin:0 auto;padding:24px 18px 48px}
+h1{font-size:1.6rem;line-height:1.25;margin:0 0 8px}
+h2{font-size:1.25rem;margin:0 0 6px;line-height:1.35}
+h3{font-size:.85rem;margin:20px 0 6px;font-family:system-ui,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:var(--mut)}
+p{margin:0 0 12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px}
+.mut{color:var(--mut);font-size:.92rem}
+.btn,.opt{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.btn{padding:10px 18px;font-family:system-ui,sans-serif;font-size:.95rem}
+.btn.p{background:var(--acc);color:var(--bg);border-color:var(--acc)}
+.btn:disabled{opacity:.4;cursor:default}
+.opt{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;padding:13px 15px;margin-bottom:10px;line-height:1.45}
+.opt:hover,.opt:focus-visible{border-color:var(--acc);outline:none}
+.opt.sel{border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc)}
+.opt b{flex:none;font:600 .72rem system-ui,sans-serif;letter-spacing:.05em;text-transform:uppercase;background:var(--acc);color:var(--bg);border-radius:99px;padding:2px 8px;margin-top:3px}
+.opt b.s2{background:var(--mut)}
+.bar{height:6px;background:var(--line);border-radius:3px;margin-bottom:18px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc);transition:width .25s}
+.row{display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:10px}
+.tag{display:inline-block;font:600 .75rem system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:99px;color:#fff;margin-bottom:10px}
+.dist div{display:flex;align-items:center;gap:10px;margin-bottom:8px;font:.88rem system-ui,sans-serif}
+.dist span.l{width:140px;flex:none}
+.dist span.t{flex:1;background:var(--line);height:10px;border-radius:5px;overflow:hidden}
+.dist span.t i{display:block;height:100%}
+.dist span.v{width:64px;text-align:right;color:var(--mut)}
+ul{margin:0 0 8px;padding-left:20px}li{margin-bottom:6px}
+.note{border-left:3px solid var(--acc);padding:2px 0 2px 12px;margin:0 0 12px}
+.hide{display:none}
+@media(max-width:480px){.dist span.l{width:100px}.dist span.v{width:56px}}
+</style>
+</head>
+<body>
+<main>
+<div id="intro" class="card">
+  <h1>Program Strategic Archetype Assessment</h1>
+  <p>A self-assessment for resource-constrained NCAA basketball programs (non-P4 Division I, Division II, NAIA, Division III). It identifies which of four strategic archetypes best fits how your program already operates, or would most naturally operate, in the NIL era.</p>
+  <p class="mut">Start with three quick questions about your situation, then 12 questions about strategy. For each strategy question, choose the statement that is <b>most like your program</b>, then the one that is <b>second most like it</b>. If your program has no NIL activity yet, answer for what would fit you best. About 5 minutes. There are no wrong answers: a strong fit is the goal, not a high score.</p>
+  <button class="btn p" id="start">Begin</button>
+</div>
+
+<div id="quiz" class="card hide">
+  <div class="bar"><i id="prog"></i></div>
+  <div class="mut" id="count"></div>
+  <h2 id="q"></h2>
+  <p class="mut" id="hint"></p>
+  <div id="opts"></div>
+  <div class="row"><button class="btn" id="back">Back</button><button class="btn p" id="next" disabled>Next</button></div>
+</div>
+
+<div id="result" class="hide"></div>
+
+<p class="mut" style="margin-top:22px">Draft instrument based on a thesis framework (Barney, 1991; Porter, 1996; Kim &amp; Mauborgne, 2004; Zvosec &amp; Bass, 2022). It is a decision aid, not a validated psychometric test.</p>
+</main>
+<script>
+const A={
+C:{name:"Collaborative and Cooperative Coordinator",short:"Coordinator",col:"var(--c)",tag:"Win through partnership",ex:"Borussia Dortmund’s loan-and-development model, where a player’s value is created across several organizations rather than owned by one.",
+core:"Your advantage is relational. You create more value by connecting your program to other programs, organizations, and pathways than by trying to own every asset yourself.",
+moves:["Map two or three programs, club teams, or organizations whose players or needs complement yours, and explore pipeline or development arrangements.","Explore fair compensation terms when players move, such as buyout or transfer-fee language, where rules and contracts allow it.","Name one person responsible for external relationships so they do not depend on the head coach alone."],
+nil:"Treat NIL as a way to make staying in, or joining, your network more attractive, not just as a pay-for-talent budget.",
+watch:"One-sided deals. Partnerships only last when each side gets something, and eligibility and inducement rules must be checked with compliance first."},
+N:{name:"Differentiated Niche Leader",short:"Niche Leader",col:"var(--n)",tag:"Win by being known for one thing",ex:"Gonzaga’s national, international-minded recruiting identity built outside the Power 4 resource structure.",
+core:"Your advantage is distinctiveness. You do not try to be a smaller version of a rich program; you become the obvious destination for a specific kind of player.",
+moves:["Write one sentence that completes “We are the program for ____” and test every recruiting and spending decision against it.","Build a dedicated capability around it (a pipeline, a position, a style of play, an academic pathway).","Say no to initiatives that dilute the identity, since strategy is as much about what you decline."],
+nil:"Concentrate NIL on the signature area and on retaining the players who embody it, rather than spreading it thinly across the roster.",
+watch:"Becoming average at everything. If your niche cannot be explained in one line, or the institution does not back it, it is not yet a differentiator."},
+B:{name:"Brand and Community Creator",short:"Brand & Community",col:"var(--b)",tag:"Win by building belonging",ex:"London Lions growing a basketball identity, fan base, and community presence in a new market.",
+core:"Your advantage is local meaning. Athletes, alumni, businesses, and fans connect to your program in ways a wealthier but more distant program cannot copy.",
+moves:["Pick one recurring supporter or community experience (a hospitality event, a community camp or court) and make it reliable.","Create NIL opportunities tied to local businesses and athlete branding, with clearly defined services and deliverables. NIL can also mean athlete speaking, hosting, or ambassador roles, not only cash.","Spell out for supporters what their money does and how your model differs from existing athletic fundraising."],
+nil:"Use NIL to deepen the relationship between players and the community, which also gives players reasons to stay beyond a paycheck.",
+watch:"Donor fatigue and compliance. Language suggesting supporters pay for access to players, or tying funds to recruiting or playing time, creates risk."},
+R:{name:"Resource Optimizer",short:"Resource Optimizer",col:"var(--r)",tag:"Win through value per dollar",ex:"FC Basel’s scouting, academy, and development system that turns young talent into on-court and financial value.",
+core:"Your advantage is process. You find, develop, and place talent more efficiently than competitors, so each dollar and each coaching hour produces more.",
+moves:["Define what an undervalued player looks like for you and build a repeatable scouting and evaluation checklist.","Invest first in development and placement (training, film, analytics, pathways to higher levels) that raises player value.","Plan retention deliberately: decide which players are worth keeping and what you will do when others leave."],
+nil:"Direct NIL toward players with the best development trajectory and fit, and track the return on each dollar.",
+watch:"Becoming a feeder program. Without a retention plan or an identity, you may keep losing your best players with little in return."}};
+const CTX=[
+["Which level best describes your institution?","",[["d1","NCAA Division I (non-Power 4)"],["d2","NCAA Division II or NAIA"],["d3","NCAA Division III"]]],
+["Which best describes your program’s current approach to NIL?","",[["0","None or passive: no organized approach, or athletes handle it on their own"],["1","Exploring: discussing, learning, or just starting a collective"],["2","Active: an organized collective or in-house effort with some funding"],["3","Established: dedicated funding, staff, and ongoing deals"]]],
+["How would you describe your institution’s posture toward NIL?","",[["0","Discouraging or opposed"],["1","Neutral or hands-off"],["2","Supportive"],["3","Actively driving it"]]]];
+const Q=[
+["When a player you developed receives a bigger offer elsewhere, your most realistic response is to…",{C:"Look for a way the move still benefits us, through buyout or transfer-fee terms, a relationship with the next program, or an ongoing connection.",N:"Remind him of what only we offer: a clear role, identity, or pathway he cannot get elsewhere.",B:"Lean on the bond he has built with teammates, fans, and the community here.",R:"Plan for it. We expect turnover and have already identified and are developing the next player."}],
+["Your program’s most valuable asset today is…",{C:"Relationships with other coaches, programs, agents, or organizations.",N:"A distinctive reputation or pipeline in one specific area.",B:"A loyal base of fans, alumni, and local businesses, or a market where we are the main show.",R:"Our ability to spot and develop talent other programs overlook."}],
+["If you received additional NIL or fundraising dollars tomorrow, your first instinct would be to…",{C:"Use them in partnership with another program, organization, or sponsor so the money goes further.",N:"Put them behind the one thing we want to be known for.",B:"Create supporter experiences, athlete branding, and local business opportunities.",R:"Put them where they raise player value most: development, scouting, and keeping proven contributors."}],
+["The core of your recruiting pitch sounds most like…",{C:"“Join a network that opens doors well beyond our campus.”",N:"“Nobody does this particular thing the way we do, and here is the role you will have.”",B:"“Be the face of a community that truly shows up for you.”",R:"“We will make you better, and you will leave more valuable than you arrived.”"}],
+["You would say your program succeeds when…",{C:"Players and partners advance together and our network keeps growing.",N:"We are recognized for a clear identity and the wins follow from it.",B:"The gym is full and the community is proud of the team.",R:"Results are sustainable, finances balance, and player value grows year over year."}],
+["The strongest card your institution brings to athletics is…",{C:"Openness to affiliations, regional ties, or partnerships beyond campus.",N:"A distinctive academic, cultural, or geographic identity we can build around.",B:"A tight-knit town, college-town market, or alumni community.",R:"Administrators who reward efficiency and clear accountability for results."}],
+["If you could add one staff position, it would be…",{C:"A partnerships and external relations lead.",N:"A specialist in our signature area, such as an international recruiting director.",B:"A fundraising, marketing, and community-engagement hire who builds supporter and business relationships.",R:"A player development, analytics, or scouting specialist."}],
+["You view the transfer portal mainly as…",{C:"A market where relationships and fair terms, such as buyouts or transfer fees, can benefit both programs.",N:"A tool to find only players who fit our specific identity.",B:"A threat to the continuity and belonging we have built.",R:"A market to find undervalued players, develop them, and replace departures efficiently."}],
+["Your biggest strategic worry is…",{C:"Partnerships that become one-sided or unreliable.",N:"Being average at everything and known for nothing.",B:"Supporters not seeing a return on what they give, leading to donor fatigue.",R:"Losing developed players without getting any return."}],
+["Against much wealthier programs, you intend to…",{C:"Cooperate where it helps both sides rather than fight head-on.",N:"Avoid their game and compete in a space where we can be the best.",B:"Out-connect them, because local authenticity is hard to buy.",R:"Out-execute them, delivering more value from every dollar."}],
+["The idea that excites you most is…",{C:"Pipeline and development agreements with other organizations.",N:"Becoming the go-to destination for a specific type of player.",B:"A public court, community events, and a local business collective.",R:"A system that runs from scouting to development to placement."}],
+["Realistically, new money for your program is most likely to come from…",{C:"Shared arrangements: buyouts, transfer fees, guarantee games, or co-funded efforts with partners.",N:"A smaller group of donors who deeply believe in our specific identity or pathway.",B:"A broad base of local businesses, alumni, and supporters through memberships, events, and sponsorships.",R:"Reallocating what we already have, such as the operating budget, and redirecting donor funds where they matter most."}]];
+const NC=CTX.length,T=NC+Q.length;
+const $=id=>document.getElementById(id);
+let i=0,ctx=[],ans=[],order=[],lock=false;
+function shuffle(a){a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
+function show(id){["intro","quiz","result"].forEach(x=>$(x).classList.toggle("hide",x!==id));window.scrollTo(0,0)}
+function start(){i=0;ctx=[];ans=Q.map(()=>({}));order=Q.map(()=>shuffle(["C","N","B","R"]));show("quiz");render()}
+function go(d){i+=d;if(i>=T)finish();else render()}
+function render(){
+  $("prog").style.width=(i/T*100)+"%";$("back").style.visibility=i?"visible":"hidden";
+  const o=$("opts");o.innerHTML="";
+  if(i<NC){const c=CTX[i];$("count").textContent="About your program · "+(i+1)+" of "+NC;$("q").textContent=c[0];$("hint").textContent="";
+    c[2].forEach(([k,l])=>{const b=document.createElement("button");b.className="opt"+(ctx[i]===k?" sel":"");b.textContent=l;
+      b.onclick=()=>{ctx[i]=k;go(1)};o.appendChild(b)});
+    $("next").disabled=ctx[i]===undefined;$("next").onclick=()=>go(1);return}
+  const n=i-NC,q=Q[n],a=ans[n];
+  $("count").textContent="Question "+(n+1)+" of "+Q.length;$("q").textContent=q[0];
+  $("hint").textContent=!a.a?"Choose the statement MOST like your program.":!a.b?"Now choose the one that is SECOND most like your program.":"Tap a choice to change it.";
+  order[n].forEach(k=>{const b=document.createElement("button");b.className="opt"+(a.a===k||a.b===k?" sel":"");
+    b.innerHTML=(a.a===k?"<b>1st</b>":a.b===k?"<b class='s2'>2nd</b>":"")+"<span></span>";b.lastChild.textContent=q[1][k];
+    b.onclick=()=>{
+      if(a.a===k){a.a=a.b;a.b=undefined;render()}
+      else if(a.b===k){a.b=undefined;render()}
+      else if(!a.a){a.a=k;render()}
+      else if(!a.b){a.b=k;render();if(!lock){lock=true;setTimeout(()=>{lock=false;go(1)},350)}}
+      else{a.b=k;render()}};
+    o.appendChild(b)});
+  $("next").disabled=!(a.a&&a.b);$("next").onclick=()=>go(1);
+}
+function finish(){
+  const s={C:0,N:0,B:0,R:0};ans.forEach(a=>{s[a.a]+=3;s[a.b]+=1});
+  const tot=Q.length*4,pct=k=>Math.round(s[k]/tot*100);
+  const r=Object.keys(s).sort((x,y)=>s[y]-s[x]);const p=r[0],sec=r[1];
+  const gap=s[p]-s[sec],blend=gap<=4,strong=s[p]>=22&&gap>=10;
+  const a=A[p],lvl=ctx[0],stg=+ctx[1],post=+ctx[2];
+  let h='<div class="card"><span class="tag" style="background:'+a.col+'">'+(blend?"Leading fit":"Your archetype")+'</span><h1>'+a.name+'</h1><p><em>'+a.tag+'</em></p>';
+  h+='<p class="mut">Fit clarity: <b>'+(blend?"Blended":strong?"Strong":"Moderate")+'</b>. ';
+  if(blend)h+='Your top two scores are very close. Lead with <b>'+a.name+'</b> and use <b>'+A[sec].name+'</b> as a supporting move.';
+  else if(s[sec]>=Q.length*4*.2)h+='Secondary lean: <b>'+A[sec].name+'</b>.';
+  h+='</p><h3>Your score profile</h3><div class="dist">'+r.map(k=>'<div><span class="l">'+A[k].short+'</span><span class="t"><i style="width:'+pct(k)+'%;background:'+A[k].col+'"></i></span><span class="v">'+pct(k)+'% · '+s[k]+'/'+tot+'</span></div>').join("")+'</div>';
+  h+='<h3>What this means</h3><p>'+a.core+'</p><h3>Reference case</h3><p>'+a.ex+'</p>';
+  h+='<h3>First moves</h3><ul>'+a.moves.map(m=>'<li>'+m+'</li>').join("")+'</ul>';
+  h+='<h3>How to think about NIL</h3><p>'+a.nil+'</p><h3>Watch out for</h3><p>'+a.watch+'</p>';
+  const st=["You are at the foundation stage. Before scaling any archetype, give NIL a clear owner, write a one-page position your institution can support, and run one low-cost pilot.","You are exploring. Choose the single move above that costs the least and test it for one season before building structure.","You are already active. Use this archetype to decide what to stop doing, since clear trade-offs keep efforts from sprawling.","You are established. Your task is defensibility: identify which parts of your model a wealthier rival could copy, and protect the rest."][stg];
+  const ps=post<=1?"Institutional alignment is your first constraint. Bring leadership a compliance-first, low-cost pilot rather than a full NIL program.":"You have institutional room to act, so make sure the initiative reinforces existing fundraising rather than competing with it.";
+  const ln={d1:"Whether your school participates in revenue sharing changes your options, so be explicit about your stance in any supporter message.",d2:"Rules and revenue-sharing access differ below Division I, so confirm what your association and institution allow before committing funds.",d3:"At Division III many athletes pay full tuition, so NIL-style support is often discussed as a way to ease cost gaps. Check with financial aid and compliance first, since outside income can affect need-based aid."}[lvl];
+  h+='<h3>Where to start, given your situation</h3><div class="note">'+st+'</div><div class="note">'+ps+'</div><div class="note">'+ln+'</div>';
+  if(!blend&&s[sec]>=10)h+='<h3>Borrow from your secondary lean</h3><p>'+A[sec].core+'</p>';
+  h+='<div class="row"><button class="btn" id="again">Retake</button></div></div>';
+  $("result").innerHTML=h;show("result");$("again").onclick=start;
+}
+$("start").onclick=start;
+$("back").onclick=()=>{if(i>0){i--;render()}};
+</script>
+</body>
+</html>
